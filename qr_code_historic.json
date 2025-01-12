@@ -1,0 +1,22 @@
+{
+ "1": {
+   "texto": "a",
+    "cor": "#ff0080",
+    "logo": "C:/Users/gusta/PycharmProjects/pyPRO_projetos/GeradorDeQRCode/teste_QRCode.png",
+    "data": 2,
+    "file": "C:\\Users\\gusta\\Pictures\\teste.png"
+ },
+  "2": {
+   "texto": "b",
+    "cor": "#ff0080",
+    "logo": "C:/Users/gusta/PycharmProjects/pyPRO_projetos/GeradorDeQRCode/teste_QRCode.png",
+    "data": 1
+ },
+  "3": {
+   "texto": "b",
+    "cor": "#ff0080",
+    "logo": "C:/Users/gusta/PycharmProjects/pyPRO_projetos/GeradorDeQRCode/teste_QRCode.png",
+    "data": 3,
+    "file": "C:\\Users\\gusta\\Pictures\\teste.png"
+ }
+}

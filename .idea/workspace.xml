@@ -5,8 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fecc028b-f0a6-40a0-bb84-f010b8bd7712" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/qr_code_historic.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gerador_qr_code.py" beforeDir="false" afterPath="$PROJECT_DIR$/gerador_qr_code.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/teste_QRCode.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/teste_QRCode.jpg" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/teste_QRCode.png" beforeDir="false" afterPath="$PROJECT_DIR$/teste_QRCode.png" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -24,6 +26,21 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;gustavohen27&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/gustavohen27/gerador-de-QR-Code.git&quot;,
+    &quot;accountId&quot;: &quot;60823d6e-0ae2-43c1-afda-d1eadacdd66d&quot;
+  }
+}</component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 7
 }</component>
@@ -39,7 +56,8 @@
     "Python.gerador_qr_code.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true"
+    "ignore.virus.scanning.warn.message": "true",
+    "settings.editor.selected.configurable": "preferences.externalDependencies"
   }
 }]]></component>
   <component name="SharedIndexes">

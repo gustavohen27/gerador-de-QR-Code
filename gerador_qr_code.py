@@ -16,9 +16,62 @@ MAX_SIZE_PREVIEW = 290
 def main():
     pass
 
-def load_historic():
-    pass
 
+def open_historic_window(file):
+    if file:
+        file = sorted(dict(json.load(file)).items())[0:100]
+        file = sorted(file, key=lambda qr_code: qr_code[1]['data'])
+        print(file)
+    janela_historico = Toplevel()
+    janela_historico.title("Histórico de QR Codes gerados")
+    janela_historico.config(width=500, height=400)
+
+    scrollbar = ttk.Scrollbar(janela_historico)
+    scrollbar.pack(side=RIGHT, fill=Y)
+    scrollbar_h = ttk.Scrollbar(janela_historico, orient=HORIZONTAL)
+    scrollbar_h.pack(side=BOTTOM, fill=X)
+
+    columns = ('qr_code_image', 'file', 'data', 'archive_size')
+    tree_frame = Frame(janela_historico, bg="black")
+    tree_frame.pack(expand=TRUE, fill=BOTH)
+    tree = ttk.Treeview(tree_frame, columns=columns, show='headings')
+    tree.heading('qr_code_image', text='QR Code')
+    tree.heading('file', text='Caminho')
+    tree.heading('data', text='Data de salvamento')
+    tree.heading('archive_size', text='Tamanho(bytes)')
+    tree.column('qr_code_image', width=50, anchor=CENTER)
+    tree.column('file', width=150, anchor=tk.W)
+    tree.column('data', width=100, anchor=tk.W)
+    tree.column('archive_size', width=100, anchor=tk.W)
+
+    # generate sample data
+    contacts = []
+    for qr_code_data in file:
+        file_path = qr_code_data[1]['file'] if qr_code_data[1].get('file') else None
+        try:
+            miniature = Image.open(file_path) if file_path else ""
+        except PermissionError:
+            miniature = ""
+        contacts.append((miniature, f'last {1}', f'email{1}@example.com'))
+
+    # add data to the treeview
+    for contact in contacts:
+        tree.insert('', tk.END, values=contact)
+
+    def item_selected(event):
+        for selected_item in tree.selection():
+            item = tree.item(selected_item)
+            record = item['values']
+            # show a message
+            showinfo(title='Information', message=','.join(record))
+
+    tree.bind('<<TreeviewSelect>>', item_selected)
+
+    tree.pack(fill=BOTH, expand=TRUE)
+    # add two scrollbars
+    tree.configure(yscrollcommand=scrollbar.set, xscrollcommand=scrollbar_h.set)
+    scrollbar.config(command=tree.yview)
+    scrollbar_h.config(command=tree.xview)
 
 def atualizar_preview():
     img = generate_qr_code()
@@ -137,7 +190,6 @@ def generate_qr_code():
         qr.add_data(dados)
         qr.make(fit=True)
         img = qr.make_image(fill_color=cor, back_color='white')
-        img = img.convert("RGBA")
         if entrada_logo.get():
             img = adicionar_imagem_no_meio(img, entrada_logo.get())
         return img
@@ -155,7 +207,7 @@ def salvar_qr_code():
         =formatos)
         if arquivo:
             if arquivo.endswith('.jpg') or arquivo.endswith('.jpeg'):
-                img = img.convert("RGB")
+                pass
             img.save(arquivo)
             messagebox.showinfo("Sucesso", f"QR Code salvo como '{arquivo}'")
 
@@ -203,6 +255,14 @@ def carregar_json():
             except KeyError as e:
                 print("Missing key in JSON file: ", e.args)
 
+
+def carregar_historico():
+    with open('qr_code_historic.json', "r") as historic:
+        if historic:
+            open_historic_window(historic)
+
+
+
 def adicionar_imagem_no_meio(img, logo):
     try:
         if img and logo:
@@ -231,10 +291,19 @@ def adicionar_imagem_no_meio(img, logo):
 janela = Tk()
 janela.title("Gerador de QR Code")
 janela.geometry("800x680")
-# Cria o frame esquerdo de opções
-# Cria o frame esquerdo principal de opções
-opcoes_esquerda_principal = Frame(janela, bg="cyan")
-opcoes_esquerda_principal.place(anchor=CENTER, relx=0.2, rely=0.5)
+# Cria os frames principais
+frame_esquerdo = Frame(janela, bg="cyan")
+frame_esquerdo.pack(side=LEFT, fill=BOTH, expand=TRUE)
+frame_esquerdo.pack_propagate(False)
+preview = Frame(janela, bg="blue")
+preview.pack(side=LEFT, fill=BOTH, expand=TRUE)
+preview.pack_propagate(False)
+frame_direito = Frame(janela, bg="green")
+frame_direito.pack(side=LEFT, fill=BOTH, expand=TRUE)
+frame_direito.pack_propagate(False)
+
+opcoes_esquerda_principal = Frame(frame_esquerdo, bg="purple")
+opcoes_esquerda_principal.pack(anchor=CENTER, expand=TRUE)
 
 rotulo_esquerdo = Label(opcoes_esquerda_principal, text="Configurações do gerador", pady=10)
 rotulo_esquerdo.pack()
@@ -250,22 +319,21 @@ rotulo_border.pack()
 entrada_border = Entry(opcoes_esquerda_principal, width=10)
 entrada_border.bind("<KeyRelease>", lambda _: atualizar_preview())
 entrada_border.pack()
-# Cria o frame do meio
-preview = Frame(janela, bg="blue")
-preview.place(relx=0.5, rely=0.5, anchor=CENTER, width=300, height=300)
+# Botão para abrir o histórico de QR Codes salvos
+abrir_historico = Button(frame_esquerdo, text="Abrir histórico de QR Codes", command=carregar_historico)
+abrir_historico.pack(anchor=N, expand=TRUE)
 # Preview do QR Code
 preview_image = Label(preview)
 preview_image.pack(anchor=CENTER, expand=TRUE)
+preview_max_size_info = Label(preview, text=f'Preview image max size: {MAX_SIZE_PREVIEW}x{MAX_SIZE_PREVIEW} px')
+preview_max_size_info.place(anchor=CENTER, relx=0.5, rely=0.75)
 preview_info = Label(janela)
 preview_info.place(anchor=CENTER, relx=0.5, rely=0.8)
 # Botão para guardar o QR Code
 botao_salvar = Button(janela, text="Guardar QR Code", state=tk.DISABLED, command=salvar_qr_code)
 botao_salvar.place(anchor=CENTER, relx=0.5, rely=0.9)
-# Cria o frame direito de opções
-opcoes_direita = Frame(janela, bg="green")
-opcoes_direita.pack(side=RIGHT, expand=FALSE, fill=BOTH, ipadx=50)
 # Cria o frame de geração e carregamento da direita
-opcoes_direita_principal = Frame(opcoes_direita, bg="pink")
+opcoes_direita_principal = Frame(frame_direito, bg="pink")
 opcoes_direita_principal.pack(expand=TRUE)
 # Texto do QR Code
 rotulo = Label(opcoes_direita_principal, text="Insira o texto para gerar o QR Code:", pady=10)
