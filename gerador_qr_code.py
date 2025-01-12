@@ -10,7 +10,7 @@ from io import BytesIO
 
 DEFAULT_BOX_SIZE, DEFAULT_BORDER = 10, 4
 MAX_SIZE_PREVIEW = 290
-
+MAX_SIZE_HISTORIC_THUMBNAILS = 50
 
 # Corrigir interface
 def main():
@@ -20,8 +20,7 @@ def main():
 def open_historic_window(file):
     if file:
         file = sorted(dict(json.load(file)).items())[0:100]
-        file = sorted(file, key=lambda qr_code: qr_code[1]['data'])
-        print(file)
+        file = sorted(file, key=lambda qr_code: qr_code[1]['date'])
     janela_historico = Toplevel()
     janela_historico.title("Histórico de QR Codes gerados")
     janela_historico.config(width=500, height=400)
@@ -31,47 +30,60 @@ def open_historic_window(file):
     scrollbar_h = ttk.Scrollbar(janela_historico, orient=HORIZONTAL)
     scrollbar_h.pack(side=BOTTOM, fill=X)
 
-    columns = ('qr_code_image', 'file', 'data', 'archive_size')
+    columns = ('file', 'date', 'archive_size')
+    style = ttk.Style()
+    style.configure('Treeview', rowheight=100)
     tree_frame = Frame(janela_historico, bg="black")
     tree_frame.pack(expand=TRUE, fill=BOTH)
-    tree = ttk.Treeview(tree_frame, columns=columns, show='headings')
-    tree.heading('qr_code_image', text='QR Code')
-    tree.heading('file', text='Caminho')
-    tree.heading('data', text='Data de salvamento')
-    tree.heading('archive_size', text='Tamanho(bytes)')
-    tree.column('qr_code_image', width=50, anchor=CENTER)
-    tree.column('file', width=150, anchor=tk.W)
-    tree.column('data', width=100, anchor=tk.W)
-    tree.column('archive_size', width=100, anchor=tk.W)
-
-    # generate sample data
-    contacts = []
+    tree = ttk.Treeview(tree_frame, selectmode='browse', columns=columns)
+    tree.heading('#0', text='QR Code', anchor=CENTER)
+    tree.heading('file', text='Caminho', anchor=CENTER)
+    tree.heading('date', text='Data de salvamento', anchor=CENTER)
+    tree.heading('archive_size', text='Tamanho(bytes)', anchor=CENTER)
+    tree.column('#0', width=100)
+    tree.column('file', anchor=CENTER)
+    tree.column('date', anchor=CENTER)
+    tree.column('archive_size', anchor=CENTER)
+    # generate data
+    qr_codes = []
     for qr_code_data in file:
-        file_path = qr_code_data[1]['file'] if qr_code_data[1].get('file') else None
+        file_path = qr_code_data[1]['file'] if qr_code_data[1].get('file') else ""
         try:
-            miniature = Image.open(file_path) if file_path else ""
-        except PermissionError:
-            miniature = ""
-        contacts.append((miniature, f'last {1}', f'email{1}@example.com'))
+            with Image.open(file_path) as qr_code_image:
+                qr_code_image.thumbnail((MAX_SIZE_HISTORIC_THUMBNAILS, MAX_SIZE_HISTORIC_THUMBNAILS))
+                miniature = ImageTk.PhotoImage(qr_code_image)
+                qr_codes.append(miniature)
+                if qr_code_image:
+                    buffer = BytesIO()
+                    qr_code_image.save(buffer, "PNG")
+                    miniature_size = buffer.tell()
+        except (PermissionError, FileNotFoundError):
+            miniature = None
+        tree.insert("", 'end', open=True, image=miniature or "", values=(
+            f'{file_path}',
+            f'{qr_code_data[1]['date'] if qr_code_data[1].get('date') else ""}',
+            f'{miniature_size} bytes'
+        )
+        )
+        tree.images = qr_codes
 
-    # add data to the treeview
-    for contact in contacts:
-        tree.insert('', tk.END, values=contact)
 
     def item_selected(event):
         for selected_item in tree.selection():
-            item = tree.item(selected_item)
-            record = item['values']
+            pass
+            # item = tree.item(selected_item)
+            # record = item['values']
             # show a message
-            showinfo(title='Information', message=','.join(record))
+            # showinfo(title='Information', message=','.join(record))
 
     tree.bind('<<TreeviewSelect>>', item_selected)
 
-    tree.pack(fill=BOTH, expand=TRUE)
+    tree.pack(fill=BOTH, expand=True)
     # add two scrollbars
     tree.configure(yscrollcommand=scrollbar.set, xscrollcommand=scrollbar_h.set)
     scrollbar.config(command=tree.yview)
     scrollbar_h.config(command=tree.xview)
+
 
 def atualizar_preview():
     img = generate_qr_code()
