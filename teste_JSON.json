@@ -1,5 +1,7 @@
 {
-    "texto": "aaaaaaaaaaa",
-    "cor": "#ff0080",
-    "logo": "C:/Users/gusta/PycharmProjects/pyPRO_projetos/GeradorDeQRCode/teste_QRCode.png"
+    "texto": "mkklj",
+    "cor": "#8080ff",
+    "logo": "C:/Users/gusta/Pictures/exemplo-logo.png",
+    "box size": "0",
+    "border": "1"
 }

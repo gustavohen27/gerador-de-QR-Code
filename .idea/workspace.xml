@@ -7,6 +7,7 @@
     <list default="true" id="fecc028b-f0a6-40a0-bb84-f010b8bd7712" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gerador_qr_code.py" beforeDir="false" afterPath="$PROJECT_DIR$/gerador_qr_code.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/qr_code_historic.json" beforeDir="false" afterPath="$PROJECT_DIR$/qr_code_historic.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -90,5 +91,21 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/gerador_qr_code.py</url>
+          <line>260</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/gerador_qr_code.py</url>
+          <line>266</line>
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
