@@ -5,16 +5,24 @@ from tkinter import *
 from tkinter.messagebox import showinfo
 
 import qrcode
-from PIL import Image, ImageTk, ImageColor
+from PIL import Image, ImageTk, ImageColor, ImageCms
 from io import BytesIO
+
+historic_reference = '\\gerador_qr_code.py'
+local_historic = None
 
 DEFAULT_BOX_SIZE, DEFAULT_BORDER = 10, 4
 MAX_SIZE_PREVIEW = 290
 MAX_SIZE_HISTORIC_THUMBNAILS = 50
 
 # Corrigir interface
+
 def main():
-    pass
+    try:
+        with open(historic_reference or None, 'w') as historic:
+            pass
+    except (PermissionError, FileNotFoundError):
+        messagebox.showwarning('Warning', 'Cannot load local historic file')
 
 
 def open_historic_window(file):
@@ -33,7 +41,7 @@ def open_historic_window(file):
     columns = ('file', 'date', 'archive_size')
     style = ttk.Style()
     style.configure('Treeview', rowheight=100)
-    tree_frame = Frame(janela_historico, bg="black")
+    tree_frame = Frame(janela_historico, bg="white")
     tree_frame.pack(expand=TRUE, fill=BOTH)
     tree = ttk.Treeview(tree_frame, selectmode='browse', columns=columns)
     tree.heading('#0', text='QR Code', anchor=CENTER)
@@ -46,43 +54,44 @@ def open_historic_window(file):
     tree.column('archive_size', anchor=CENTER)
     # generate data
     qr_codes = []
-    for qr_code_data in file:
-        file_path = qr_code_data[1]['file'] if qr_code_data[1].get('file') else ""
-        try:
-            with Image.open(file_path) as qr_code_image:
-                qr_code_image.thumbnail((MAX_SIZE_HISTORIC_THUMBNAILS, MAX_SIZE_HISTORIC_THUMBNAILS))
-                miniature = ImageTk.PhotoImage(qr_code_image)
-                qr_codes.append(miniature)
-                if qr_code_image:
-                    buffer = BytesIO()
-                    qr_code_image.save(buffer, "PNG")
-                    miniature_size = buffer.tell()
-        except (PermissionError, FileNotFoundError):
-            miniature = None
-        tree.insert("", 'end', open=True, image=miniature or "", values=(
-            f'{file_path}',
-            f'{qr_code_data[1]['date'] if qr_code_data[1].get('date') else ""}',
-            f'{miniature_size} bytes'
-        )
-        )
-        tree.images = qr_codes
+    if file:
+        for qr_code_data in file:
+            file_path = qr_code_data[1]['file'] if qr_code_data[1].get('file') else ""
+            try:
+                with Image.open(file_path) as qr_code_image:
+                    qr_code_image.thumbnail((MAX_SIZE_HISTORIC_THUMBNAILS, MAX_SIZE_HISTORIC_THUMBNAILS))
+                    miniature = ImageTk.PhotoImage(qr_code_image)
+                    qr_codes.append(miniature)
+                    if qr_code_image:
+                        buffer = BytesIO()
+                        qr_code_image.save(buffer, "PNG")
+                        miniature_size = buffer.tell()
+            except (PermissionError, FileNotFoundError):
+                miniature = None
+            tree.insert("", 'end', open=True, image=miniature or "", text=qr_code_data[0], values=(
+                f'{file_path}',
+                f'{qr_code_data[1]['date'] if qr_code_data[1].get('date') else ""}',
+                f'{miniature_size} bytes'
+            )
+            )
+            tree.images = qr_codes
 
 
-    def item_selected(event):
-        for selected_item in tree.selection():
-            pass
-            # item = tree.item(selected_item)
-            # record = item['values']
-            # show a message
-            # showinfo(title='Information', message=','.join(record))
+        def item_selected(event):
+            for selected_item in tree.selection():
+                pass
+                # item = tree.item(selected_item)
+                # record = item['values']
+                # show a message
+                # showinfo(title='Information', message=','.join(record))
 
-    tree.bind('<<TreeviewSelect>>', item_selected)
+        tree.bind('<<TreeviewSelect>>', item_selected)
 
-    tree.pack(fill=BOTH, expand=True)
-    # add two scrollbars
-    tree.configure(yscrollcommand=scrollbar.set, xscrollcommand=scrollbar_h.set)
-    scrollbar.config(command=tree.yview)
-    scrollbar_h.config(command=tree.xview)
+        tree.pack(fill=BOTH, expand=True)
+        # add two scrollbars
+        tree.configure(yscrollcommand=scrollbar.set, xscrollcommand=scrollbar_h.set)
+        scrollbar.config(command=tree.yview)
+        scrollbar_h.config(command=tree.xview)
 
 
 def atualizar_preview():
@@ -207,6 +216,22 @@ def generate_qr_code():
         return img
 
 
+def convert_image(image, image_type, convert_to):
+    if image:
+        allowed_types = ['RGB', 'RGBA']
+        modes = ['RGB', 'RGBA']
+        if image_type in modes:
+            if type(convert_to) == str and convert_to in modes:
+                if type(image_type) == str and image_type in allowed_types:
+                    converted_image = Image.new(convert_to, image.size)
+                    for x in range(image.width):
+                        for y in range(image.height):
+                            r, g, b, a = image.getpixel((x, y))
+
+                            converted_image.putpixel((x, y), (r, g, b))
+                    return converted_image
+
+
 def salvar_qr_code():
     formatos = [
         ("PNG files", "*.png"),
@@ -219,8 +244,10 @@ def salvar_qr_code():
         =formatos)
         if arquivo:
             if arquivo.endswith('.jpg') or arquivo.endswith('.jpeg'):
-                pass
-            img.save(arquivo)
+                img = convert_image(img, "RGBA", "RGB")
+            else:
+                img = convert_image(img, "RGB", "RGBA")
+            img.save(arquivo, quality=100)
             messagebox.showinfo("Sucesso", f"QR Code salvo como '{arquivo}'")
 
 
@@ -268,16 +295,10 @@ def carregar_json():
                 print("Missing key in JSON file: ", e.args)
 
 
-def carregar_historico():
-    with open('qr_code_historic.json', "r") as historic:
-        if historic:
-            open_historic_window(historic)
-
-
-
 def adicionar_imagem_no_meio(img, logo):
     try:
         if img and logo:
+            img = img.convert("RGBA")
             logo = Image.open(logo).convert("RGBA")
             largura_logo, altura_logo = logo.size
             largura_qr, altura_qr = img.size
@@ -298,6 +319,8 @@ def adicionar_imagem_no_meio(img, logo):
     except (FileNotFoundError, PermissionError):
         pass
 
+
+main()
 
 # Cria a janela principal
 janela = Tk()
@@ -332,7 +355,7 @@ entrada_border = Entry(opcoes_esquerda_principal, width=10)
 entrada_border.bind("<KeyRelease>", lambda _: atualizar_preview())
 entrada_border.pack()
 # Botão para abrir o histórico de QR Codes salvos
-abrir_historico = Button(frame_esquerdo, text="Abrir histórico de QR Codes", command=carregar_historico)
+abrir_historico = Button(frame_esquerdo, text="Abrir histórico de QR Codes", command=lambda historic=local_historic: open_historic_window(historic))
 abrir_historico.pack(anchor=N, expand=TRUE)
 # Preview do QR Code
 preview_image = Label(preview)
