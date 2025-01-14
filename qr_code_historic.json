@@ -1,5 +1,16 @@
 {
-  "1": {
-    "teste": 1
-  }
+    "C:/Users/gusta/Pictures/teste.png": {
+        "data": "asads",
+        "date": "2025-01-14 00:31:02.726745",
+        "logo": "C:/Users/gusta/Downloads/facebook.png",
+        "color": "#8080c0",
+        "boxSize": "4"
+    },
+    "C:/Users/gusta/Pictures/teste_qr_code.jpg": {
+        "data": "a",
+        "date": "2025-01-13 23:17:15.017731",
+        "logo": "C:/Users/gusta/Downloads/linkedin.png",
+        "color": "",
+        "boxSize": "10"
+    }
 }

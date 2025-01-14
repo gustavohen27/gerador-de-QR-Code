@@ -1,24 +1,34 @@
 import json
+from datetime import datetime
 import tkinter as tk
 from tkinter import messagebox, colorchooser, filedialog, ttk
 from tkinter import *
 from tkinter.messagebox import showinfo
-
+from tkinter.ttk import Combobox
 import qrcode
 from PIL import Image, ImageTk, ImageColor
 from io import BytesIO
+from qrcode.main import QRCode
 
 
 # Corrigir interface
 # Corrigir tamanho das linhas
+# Corrigir comentários
 class QRCodeGenerator:
 
     def __init__(self):
         self.__local_historic = None
         self._historic_reference = 'qr_code_historic.json'
+        self._DEFAULT_VERSION = 1
         self._DEFAULT_BOX_SIZE, self._DEFAULT_BORDER = 10, 4
+        self._VERSION_VALUES = [str(v) for v in range(1, 41)]
+        self._BOX_SIZE_VALUES = [str(v) for v in range(1, 11)]
+        self._BORDER_SIZE_VALUES = [str(v) for v in range(0, 5)]
+        self._LOGO_SIZE_VALUES = [str(v) for v in range(1, 5)]
         self._MAX_SIZE_PREVIEW = 290
         self._max_size_historic_thumbnails = 50
+        self._qr_code_logo_size = 6
+
         try:
             with open(self.historic_reference, 'r') as file:
                 self.local_historic = dict(json.load(file))
@@ -42,12 +52,40 @@ class QRCodeGenerator:
         self._historic_reference = reference
 
     @property
+    def default_version(self):
+        return self._DEFAULT_VERSION
+
+    @property
     def default_box_size(self):
         return self._DEFAULT_BOX_SIZE
 
     @property
     def default_border(self):
         return self._DEFAULT_BORDER
+
+    @property
+    def version_values(self):
+        return self._VERSION_VALUES
+
+    @property
+    def box_size_values(self):
+        return self._BOX_SIZE_VALUES
+
+    @property
+    def border_size_values(self):
+        return self._BORDER_SIZE_VALUES
+
+    @property
+    def qr_code_logo_size_values(self):
+        return self._LOGO_SIZE_VALUES
+
+    @property
+    def qr_code_logo_size(self):
+        return self._qr_code_logo_size
+
+    @qr_code_logo_size.setter
+    def qr_code_logo_size(self, size):
+        self.qr_code_logo_size = size
 
     @property
     def max_size_preview(self):
@@ -89,6 +127,14 @@ class QRCodeGenerator:
         if entry.get():
             value = entry.get()
             match config:
+                case "version":
+                    if value != "":
+                        if value.isnumeric():
+                            value = int(value)
+                            if 40 >= value >= 1:
+                                return value
+                    else:
+                        return self.default_version
                 case "boxSize":
                     if value != "":
                         if value.isnumeric():
@@ -132,6 +178,10 @@ class QRCodeGenerator:
             if upd_tk:
                 self.atualizar_preview()
 
+    def set_qr_code_logo_size(self):
+        self._qr_code_logo_size = int(qr_code_logo_size_entry.get()) * 2
+        self.atualizar_preview()
+
     def escolher_logo(self):
         formatos = [
             ("PNG files", "*.png"),
@@ -155,9 +205,10 @@ class QRCodeGenerator:
         dados = qr_code_entry.get()
         cor = verificar_cor(qr_code_color_entry.get()) or 'black'
         if dados:
+            version = self.confirm_preset(qr_code_version_entry, "version")
             border = self.confirm_preset(border_entry, "border")
             qr = qrcode.QRCode(
-                version=1,
+                version=version if version else self.default_version,
                 error_correction=qrcode.constants.ERROR_CORRECT_H,
                 box_size=self.confirm_preset(box_size_entry, "boxSize") or self.default_box_size,
                 border=border if border or border == 0 else self.default_border
@@ -183,8 +234,29 @@ class QRCodeGenerator:
                 if arquivo.endswith('.jpg') or arquivo.endswith('.jpeg'):
                     img = convert_image(img, "RGBA", "RGB")
                 else:
-                    img = convert_image(img, "RGB", "RGBA")
+                    pass
                 img.save(arquivo, quality=100)
+
+                qr_code_save_info = {
+                        'data': qr_code_entry.get(),
+                        'date': str(datetime.today()),
+                        'logo': qr_code_logo_entry.get(),
+                        'color': qr_code_color_entry.get(),
+                        'boxSize': box_size_entry.get()
+                    }
+
+                if not self.local_historic.get(arquivo):
+                    self.local_historic.setdefault(arquivo, qr_code_save_info)
+                else:
+                    self.local_historic[arquivo] = qr_code_save_info
+
+
+                try:
+                    with open(self.historic_reference, 'w') as file:
+                        file.write(json.dumps(self.local_historic, indent=4))
+
+                except (PermissionError, FileNotFoundError):
+                    pass
                 messagebox.showinfo("Sucesso", f"QR Code salvo como '{arquivo}'")
 
     def carregar_json(self):
@@ -208,7 +280,7 @@ class QRCodeGenerator:
                     self.atualizar_entrada(qr_code_color_entry, "update", configuracoes['cor'], disable=True)
                     self.atualizar_entrada(qr_code_logo_entry, "update", configuracoes['logo'], disable=True)
                     self.atualizar_entrada(box_size_entry, "update", configuracoes['box size'])
-                    self.atualizar_entrada(border_entry, "update", configuracoes['border'], upd_tk=True)
+                    self.atualizar_entrada(border_size_entry, "update", configuracoes['border'], upd_tk=True)
                 except KeyError as e:
                     print("Missing key in JSON file: ", e.args)
 
@@ -218,9 +290,9 @@ class Historic(QRCodeGenerator):
     def __init__(self, file):
         super().__init__()
         self.__file = file
-        if self.__file:
+        if type(self.__file) == dict:
             file = sorted(file.items())[0:100]
-            file = sorted(file, key=lambda qr_code: qr_code[1]['date'] if qr_code[1].get('date') else qr_code[0])
+            file = sorted(file, key=lambda qr_code: qr_code[1]['date'] if qr_code[1].get('date') else qr_code[0], reverse=True)
             window = Toplevel()
             window.title("Histórico de QR Codes gerados")
             window.config(width=500, height=400)
@@ -249,7 +321,7 @@ class Historic(QRCodeGenerator):
             if file:
                 for qr_code_data in file:
                     miniature_size = 0
-                    file_path = qr_code_data[1]['file'] if qr_code_data[1].get('file') else ""
+                    file_path = qr_code_data[0] or None
                     try:
                         with Image.open(file_path) as qr_code_image:
                             qr_code_image.thumbnail(
@@ -262,7 +334,7 @@ class Historic(QRCodeGenerator):
                                 miniature_size = buffer.tell()
                     except (PermissionError, FileNotFoundError):
                         miniature = None
-                    tree.insert("", 'end', open=True, image=miniature or "", text=qr_code_data[0], values=(
+                    tree.insert("", 'end', open=True, image=miniature or "", text=qr_code_data[0][qr_code_data[0].find('.') + 1:len(qr_code_data[0])], values=(
                         f'{file_path}',
                         f'{qr_code_data[1]['date'] if qr_code_data[1].get('date') else ""}',
                         f'{miniature_size} bytes'
@@ -313,13 +385,16 @@ def convert_image(image, image_type, convert_to):
         if image_type in modes:
             if type(convert_to) == str and convert_to in modes:
                 if type(image_type) == str and image_type in allowed_types:
-                    converted_image = Image.new(convert_to, image.size)
-                    for x in range(image.width):
-                        for y in range(image.height):
-                            r, g, b, a = image.getpixel((x, y))
-
-                            converted_image.putpixel((x, y), (r, g, b))
-                    return converted_image
+                    converted_image = None
+                    if image_type == "RGBA" and convert_to == "RGB":
+                        converted_image = Image.new('RGB', image.size)
+                        for x in range(image.width):
+                            for y in range(image.height):
+                                r, g, b, a = image.getpixel((x, y))
+                                converted_image.putpixel((x, y), (r, g, b))
+                    elif image_type == "RGB" and convert_to == "RGBA":
+                        converted_image = image.convert("RGBA")
+                    return converted_image or image
 
 
 def salvar_json():
@@ -333,7 +408,7 @@ def salvar_json():
                     "cor": qr_code_color_entry.get(),
                     "logo": qr_code_logo_entry.get(),
                     "box size": box_size_entry.get(),
-                    "border": border_entry.get()
+                    "border": qr_code_border_entry.get()
                 },
                 arquivo,
                 indent=4
@@ -351,8 +426,8 @@ def adicionar_imagem_no_meio(img, logo):
             Redimensiona a imagem do logo se for maior que 1/6 do
             tamanho do QR Code
             """
-            fator_redimensionamento = min(largura_qr // 6 / largura_logo, altura_qr
-                                          // 6 / altura_logo)
+            fator_redimensionamento = min(largura_qr // qr_code_generator.qr_code_logo_size * 2 / largura_logo, altura_qr
+                                          // qr_code_generator.qr_code_logo_size * 2 / altura_logo)
             if fator_redimensionamento < 1:
                 logo = logo.resize((int(largura_logo * fator_redimensionamento), int(
                     altura_logo * fator_redimensionamento)), Image.LANCZOS)
@@ -389,16 +464,26 @@ main_left_frame = Frame(left_frame, bg="purple")
 main_left_frame.pack(anchor=CENTER, expand=TRUE)
 mlf_title = Label(main_left_frame, text="Configurações do gerador", pady=10)
 mlf_title.pack()
+# Para configurar a versão do QR Code
+qr_code_version_label = Label(main_left_frame, text="Versão do QR Code")
+qr_code_version_label.pack()
+qr_code_version_entry = Combobox(main_left_frame, width=10, state="readonly", values=qr_code_generator.version_values, takefocus=qr_code_generator.atualizar_preview)
+qr_code_version_entry.current(0)
+qr_code_version_entry.bind("<<ComboboxSelected>>", lambda _: qr_code_generator.atualizar_preview())
+qr_code_version_entry.pack()
+# Para configurar o "box_size" do QR Code
 box_size_label = Label(main_left_frame, text="Tamanho de caixa")
 box_size_label.pack()
-box_size_entry = Entry(main_left_frame, width=10)
-box_size_entry.bind("<KeyRelease>", lambda _: qr_code_generator.atualizar_preview())
+box_size_entry = Combobox(main_left_frame, width=10, state="readonly", values=qr_code_generator.box_size_values)
+box_size_entry.current(9)
+box_size_entry.bind("<<ComboboxSelected>>", lambda _: qr_code_generator.atualizar_preview())
 box_size_entry.pack()
 # Para configurar a "border" do QR Code
 border_label = Label(main_left_frame, text="Tamanho da borda")
 border_label.pack()
-border_entry = Entry(main_left_frame, width=10)
-border_entry.bind("<KeyRelease>", lambda _: qr_code_generator.atualizar_preview())
+border_entry = Combobox(main_left_frame, width=10, state="readonly", values=qr_code_generator.border_size_values)
+border_entry.current(4)
+border_entry.bind("<<ComboboxSelected>>", lambda _: qr_code_generator.atualizar_preview())
 border_entry.pack()
 # Botão para abrir o histórico de QR Codes salvos
 open_historic_button = Button(left_frame, text="Abrir histórico de QR Codes",
@@ -421,29 +506,35 @@ main_right_frame = Frame(right_frame, bg="pink")
 main_right_frame.pack(expand=TRUE)
 # Texto do QR Code
 qr_code_entry_info = Label(main_right_frame, text="Insira o texto para gerar o QR Code:", pady=10)
-qr_code_entry_info.grid(row=0)
+qr_code_entry_info.pack()
 
 qr_code_entry = Entry(main_right_frame, width=40)
 qr_code_entry.bind("<KeyRelease>", lambda _: qr_code_generator.atualizar_preview())
-qr_code_entry.grid(row=1)
+qr_code_entry.pack()
 # Cor do QR Code
 qr_code_color_button = Button(main_right_frame, text="Escolher cor", command=qr_code_generator.escolher_cor)
-qr_code_color_button.grid(row=2, pady=15)
+qr_code_color_button.pack(pady=15)
 
 qr_code_color_entry = Entry(main_right_frame, width=40, state=tk.DISABLED)
-qr_code_color_entry.grid(row=3)
+qr_code_color_entry.pack()
 
 qr_code_color_delete_button = Button(main_right_frame, text="X",
                                      command=lambda entrada=qr_code_color_entry: qr_code_generator.atualizar_entrada(
                                          entrada, "delete", upd_tk=True,
                                          disable=True))
-qr_code_color_delete_button.grid(row=3, column=2, ipadx=5, columnspan=2)
+qr_code_color_delete_button.pack()
 # Imagem do meio do QR Code
 qr_code_logo_button = Button(main_right_frame, text="Escolher logo", command=qr_code_generator.escolher_logo)
-qr_code_logo_button.grid(row=4, pady=15)
+qr_code_logo_button.pack(pady=15)
 
+qr_code_logo_size_label = Label(main_right_frame, text="Tamanho da logo")
+qr_code_logo_size_label.pack()
+qr_code_logo_size_entry = Combobox(main_right_frame, width=10, state="readonly", values=qr_code_generator.qr_code_logo_size_values)
+qr_code_logo_size_entry.current(3)
+qr_code_logo_size_entry.bind("<<ComboboxSelected>>", lambda _: qr_code_generator.set_qr_code_logo_size())
+qr_code_logo_size_entry.pack()
 qr_code_logo_entry = Entry(main_right_frame, width=40, state=tk.DISABLED)
-qr_code_logo_entry.grid(row=5)
+qr_code_logo_entry.pack()
 
 qr_code_logo_delete_button = Button(main_right_frame, text="X",
                                     command=
@@ -451,20 +542,20 @@ qr_code_logo_delete_button = Button(main_right_frame, text="X",
                                                                                                            "delete",
                                                                                                            upd_tk=True,
                                                                                                            disable=True))
-qr_code_logo_delete_button.grid(row=5, column=2, ipadx=5, columnspan=2)
+qr_code_logo_delete_button.pack()
 # box_size = Entry(main_window, width=20, state=tk.DISABLED)
 # box_size.bind("<FocusOut>", lambda _: update_presets())
 # box_size=10,
 # border=4,
 
 json_save_label = Label(main_right_frame, text="Salvar as configurações em um arquivo JSON")
-json_save_label.grid(row=6)
+json_save_label.pack()
 json_save_button = Button(main_right_frame, text="Salvar JSON", command=salvar_json)
-json_save_button.grid(row=7, pady=7)
+json_save_button.pack()
 
 json_load_label = Label(main_right_frame, text="Carregar as configurações de um arquivo JSON")
-json_load_label.grid(row=8)
+json_load_label.pack()
 json_load_button = Button(main_right_frame, text="Carregar JSON", command=qr_code_generator.carregar_json)
-json_load_button.grid(row=9, pady=7)
+json_load_button.pack()
 
 main_window.mainloop()
