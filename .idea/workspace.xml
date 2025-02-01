@@ -7,18 +7,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fecc028b-f0a6-40a0-bb84-f010b8bd7712" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/config.ini" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/historic.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/qr_code_generator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/GeradorDeQRCode.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/GeradorDeQRCode.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gerador_qr_code.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/qr_code_historic.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/teste_JSON.json" beforeDir="false" afterPath="$PROJECT_DIR$/teste_JSON.json" afterDir="false" />
-    </list>
+    <list default="true" id="fecc028b-f0a6-40a0-bb84-f010b8bd7712" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
