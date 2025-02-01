@@ -12,7 +12,6 @@ from io import BytesIO
 from os import path
 import configparser
 
-
 # Corrigir interface
 # Corrigir tamanho das linhas
 # Corrigir comentários
