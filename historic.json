@@ -1,0 +1,62 @@
+{
+    "C:/Users/gusta/Pictures/teste_qr_code.jpg": {
+        "data": "jijijihghy",
+        "date": "2025-01-16 18:56:30.532825",
+        "logo": "C:/Users/gusta/Pictures/exemplo-logo.png",
+        "color": "#00ff40",
+        "version": "1",
+        "box_size": "10",
+        "border": "4"
+    },
+    "C:/Users/gusta/Pictures/teste2.png": {
+        "data": "jijijihghyygyu",
+        "date": "2025-01-20 00:49:56",
+        "logo": "C:/Users/gusta/Pictures/exemplo-logo.png",
+        "logo_size": "0.4",
+        "color": "#00ffff",
+        "version": "1",
+        "box_size": "3",
+        "border": "4",
+        "background_color": "",
+        "logo_aspect_ratio": "1",
+        "resize_logo": "1"
+    },
+    "C:/Users/gusta/Pictures/teste3.png": {
+        "data": "yug",
+        "date": "2025-01-19 23:56:31",
+        "logo": "",
+        "color": "#ff0080",
+        "version": "5",
+        "box_size": "3",
+        "border": "4",
+        "background_color": "#8080ff",
+        "logo_aspect_ratio": "0",
+        "resize_logo": "0"
+    },
+    "C:/Users/gusta/Pictures/teste.png": {
+        "data": "mkmk",
+        "date": "2025-01-30 00:35:27",
+        "logo": "",
+        "logo_size": "0.2",
+        "color": "",
+        "version": "1",
+        "box_size": "10",
+        "border": "4",
+        "background_color": "",
+        "logo_aspect_ratio": "1",
+        "resize_logo": "1"
+    },
+    "C:/Users/gusta/Pictures/teste9.png": {
+        "data": "mkmk",
+        "date": "2025-01-30 00:35:53",
+        "logo": "",
+        "logo_size": "0.2",
+        "color": "",
+        "version": "1",
+        "box_size": "10",
+        "border": "4",
+        "background_color": "",
+        "logo_aspect_ratio": "1",
+        "resize_logo": "1"
+    }
+}

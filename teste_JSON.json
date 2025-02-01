@@ -1,7 +1,54 @@
 {
-    "texto": "mkklj",
-    "cor": "#8080ff",
-    "logo": "C:/Users/gusta/Pictures/exemplo-logo.png",
-    "box size": "0",
-    "border": "1"
+    "C:/Users/gusta/Pictures/teste2.png": {
+        "data": "jijijihghyygyu",
+        "date": "2025-01-20 00:49:56",
+        "logo": "C:/Users/gusta/Pictures/exemplo-logo.png",
+        "logoSize": "0.4",
+        "color": "#00ffff",
+        "version": "1",
+        "boxSize": "3",
+        "border": "4",
+        "backgroundColor": "",
+        "logoAspectRatio": "1",
+        "resizeLogo": "1"
+    },
+    "C:/Users/gusta/Pictures/teste.png": {
+        "data": "kmgyg",
+        "date": "2025-01-30 22:23:35",
+        "logo": "C:/Users/gusta/PycharmProjects/pyPRO_projetos/GeradorDeQRCode/teste_QRCode.png",
+        "logo_size": "0.8",
+        "color": "#ff0080",
+        "version": "11",
+        "box_size": "10",
+        "border": "1",
+        "background_color": "#ffff80",
+        "logo_aspect_ratio": "1",
+        "resize_logo": "1"
+    },
+    "C:/Users/gusta/Pictures/teste_qr_code.jpg": {
+        "data": "kmgyg",
+        "date": "2025-01-30 22:22:14",
+        "logo": "C:/Users/gusta/PycharmProjects/pyPRO_projetos/GeradorDeQRCode/teste_QRCode.png",
+        "logo_size": "0.8",
+        "color": "#ff0080",
+        "version": "11",
+        "box_size": "10",
+        "border": "1",
+        "background_color": "#ffff80",
+        "logo_aspect_ratio": "1",
+        "resize_logo": "1"
+    },
+    "C:/Users/gusta/Pictures/teste99.png": {
+        "data": "kmgygguu",
+        "date": "2025-01-30 22:24:13",
+        "logo": "C:/Users/gusta/PycharmProjects/pyPRO_projetos/GeradorDeQRCode/teste_QRCode.png",
+        "logo_size": "0.8",
+        "color": "#ff0080",
+        "version": "11",
+        "box_size": "10",
+        "border": "1",
+        "background_color": "#ffff80",
+        "logo_aspect_ratio": "1",
+        "resize_logo": "1"
+    }
 }
