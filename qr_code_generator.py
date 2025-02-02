@@ -1,22 +1,27 @@
+import configparser
+import svgwrite
 import json
-from datetime import datetime
-from numpy import arange
 import tkinter
+from datetime import datetime
+from io import BytesIO
 from json import JSONDecodeError
-from tkinter import messagebox, colorchooser, filedialog, ttk
+from os import path
 from tkinter import *
+from tkinter import messagebox, colorchooser, filedialog, ttk
 from tkinter.ttk import Combobox, Treeview, Style
+
 import qrcode
 from PIL import Image, ImageTk, ImageColor
-from io import BytesIO
-from os import path
-import configparser
+from numpy import arange
+
 
 # Corrigir interface
 # Corrigir tamanho das linhas
 # Corrigir comentários
 # Corrigir linguagem
 # Mudar os espaçamentos
+# tamanho do texto qr
+# configurar CSV
 
 class App(Tk):
 
@@ -221,9 +226,10 @@ class App(Tk):
         self.qr_code_entry_label = Label(self.qr_code_entry_frame,
                                          text='Insert the data to '
                                               'generate the QR Code:')
-        self.qr_code_entry = Entry(self.qr_code_entry_frame, width=75)
+        self.qr_code_entry = Entry(self.qr_code_entry_frame)
         self.qr_code_entry.bind("<KeyRelease>",
                                 lambda _: self.update_preview())
+        self.text_size = Label(self.qr_code_entry_frame, text="")
         # QR Code color widgets
         self.qr_code_color_frame = LabelFrame(self
                                               .right_configurations_frame_1,
@@ -309,7 +315,8 @@ class App(Tk):
         self.preview_max_size_info.pack_configure(pady=(25, 0))
         self.preview_info.pack_configure(pady=(0, 25))
         self.qr_code_entry_frame.pack_configure(fill=X)
-        self.qr_code_entry_frame.configure()
+        self.qr_code_entry.pack_configure(fill=X)
+        self.text_size.pack_configure(pady=0)
         self.right_configurations_frame_1.pack(expand=TRUE)
         self.left_frame.pack_propagate(False)
         self.preview_image.pack_configure(pady=0, padx=0)
@@ -395,7 +402,7 @@ class App(Tk):
         return self._qr_code_logo_size.get()
 
     def set_qr_code_logo_size(self, size):
-        self._qr_code_logo_size.set(size)
+        self._qr_code_logo_size.set(size or '0.2')
 
     @property
     def max_size_preview(self):
@@ -446,9 +453,11 @@ class App(Tk):
             self.preview_info.config(
                 text=f'Image total size: {width}x{height} px | '
                      f'File size(in memory): {file_size}')
+            self.text_size.config(text=f'Entry length: {len(self.qr_code_entry.get())}')
         else:
             self.preview_image.config(image='')
             self.preview_info.config(text="")
+            self.text_size.config(text="")
         self.grab_release()
 
     def update_entries(self, entry, task, value="", upd_preview=False,
@@ -576,18 +585,30 @@ class App(Tk):
         file_types = [
             ("PNG files", "*.png"),
             ("JPEG files", "*.jpg"),
-            ("BMP files", "*.bmp")
+            ("BMP files", "*.bmp"),
+            ("SVG files", "*.svg")
         ]
         img = self.generate_qr_code()
         if img:
             file = filedialog.asksaveasfilename(defaultextension=".png",
                                                 filetypes=file_types)
             if file:
-                if file.endswith('.jpg') or file.endswith('.jpeg'):
-                    img = convert_image(img, "RGB")
-                else:
-                    pass
-                img.save(file, quality=100)
+                if file.endswith('.jpg') or file.endswith('.jpeg') or file.endswith('.png'):
+                    if file.endswith('.jpg') or file.endswith('.jpeg'):
+                        img = convert_image(img, "RGB")
+                        img.save(file, quality=100)
+                    elif file.endswith('.svg'):
+                        width, height = img.size
+                        dwg = svgwrite.Drawing(file, profile='tiny', size=(width, height))
+                        image = img.convert('L')
+                        for y in range(height):
+                            for x in range(width):
+                                pixel = image.getpixel((x, y))
+                                dwg.add(dwg.rect(insert=(x, y), size=(1, 1),
+                                                 fill=svgwrite.rgb(pixel, pixel, pixel, '%')))
+                        dwg.save()
+                    else:
+                        pass
                 qr_code_save_info = {key: value[1]() for key, value in
                                      self.data_commands.items()}
 

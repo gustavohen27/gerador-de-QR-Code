@@ -47,10 +47,23 @@
         "resize_logo": "1"
     },
     "C:/Users/gusta/Pictures/teste9.png": {
-        "data": "mkmk",
-        "date": "2025-01-30 00:35:53",
+        "data": "fgdf",
+        "date": "2025-02-01 21:32:12",
         "logo": "",
-        "logo_size": "0.2",
+        "logo_size": "0.6",
+        "color": "",
+        "version": "1",
+        "box_size": "10",
+        "border": "4",
+        "background_color": "",
+        "logo_aspect_ratio": "1",
+        "resize_logo": "1"
+    },
+    "C:/Users/gusta/Pictures/teste_QRCode.svg": {
+        "data": "kjijiojiojiojio",
+        "date": "2025-02-01 21:24:25",
+        "logo": "",
+        "logo_size": "0.6",
         "color": "",
         "version": "1",
         "box_size": "10",
